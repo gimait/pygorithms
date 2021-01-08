@@ -94,7 +94,7 @@ class TestGeneticIntegration(unittest.TestCase):
         sol, err = bench.run_optimization()
         dt = time.perf_counter() - t0
         self.log.debug('OR training time: {}'.format(dt))
-        self.assertTrue(dt < 15)
+        self.assertTrue(dt < 20)
         self.assertAlmostEqual(err, 0.0, places=4)
 
     def test_XOR(self):
@@ -111,7 +111,7 @@ class TestGeneticIntegration(unittest.TestCase):
         sol, err = bench.run_optimization()
         dt = time.perf_counter() - t0
         self.log.debug('XOR training time: {}'.format(dt))
-        self.assertTrue(dt < 15)
+        self.assertTrue(dt < 20)
         self.assertAlmostEqual(err, 0.0, places=4)
 
     def test_AND(self):
@@ -128,7 +128,7 @@ class TestGeneticIntegration(unittest.TestCase):
         sol, err = bench.run_optimization()
         dt = time.perf_counter() - t0
         self.log.debug('AND training time: {}'.format(dt))
-        self.assertTrue(dt < 15)
+        self.assertTrue(dt < 20)
         self.assertAlmostEqual(err, 0.0, places=4)
 
     def test_XAND(self):
@@ -145,7 +145,7 @@ class TestGeneticIntegration(unittest.TestCase):
         sol, err = bench.run_optimization()
         dt = time.perf_counter() - t0
         self.log.debug('XAND training time: {}'.format(dt))
-        self.assertTrue(dt < 15)
+        self.assertTrue(dt < 20)
         self.assertAlmostEqual(err, 0.0, places=4)
 
 
