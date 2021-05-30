@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 
 def parse_yolo_cfg(cfg: str) -> List[Dict]:
@@ -46,7 +46,7 @@ def create_modules(blocks: List[Dict]) -> Tuple[Dict, nn.ModuleList]:
             kernel = int(b["size"])
             stride = int(b["stride"])
             bias = False if "batch_normalize" in b else True
-            padding = kernel - 1 if "pad" in b else 0
+            padding = (kernel - 1) // 2 if int(b.get("pad", 0)) else 0
 
             conv = nn.Conv2d(prev_filters, filters, kernel, stride, padding, bias=bias)
             module.add_module("conv_{}".format(idx), conv)
@@ -137,8 +137,8 @@ class Darknet(nn.Module):
 
             elif module_type == "yolo":
                 anchors = self.module_list[idx][0].anchors
-                n_inputs = self.net_info["height"]
-                n_classes = module["classes"]
+                n_inputs = int(self.net_info["height"])
+                n_classes = int(module["classes"])
 
                 x = x.data
                 x = predict_transform(x, n_inputs, anchors, n_classes, cuda)
@@ -159,7 +159,10 @@ class DetectionLayer(nn.Module):
         self.anchors = anchors
 
 
-def predict_transform(prediction, inp_dim, anchors, num_classes, cuda=True):
+def predict_transform(prediction: torch.Tensor, inp_dim: int,
+                      anchors: List[Tuple[int, int]],
+                      num_classes: int,
+                      cuda: Optional[bool] = True) -> torch.Tensor:
     batch_size = prediction.size(0)
     stride = inp_dim // prediction.size(2)
     grid_size = inp_dim // stride
@@ -206,8 +209,8 @@ def predict_transform(prediction, inp_dim, anchors, num_classes, cuda=True):
 
 
 def get_test_input():
-    img = cv2.imread("dog-cycle-car.png")
-    img = cv2.resize(img, (416, 416))
+    img = cv2.imread("pygorithms/dog-cycle-car.png")
+    img = cv2.resize(img, (608, 608))
     img = img[:, :, ::-1].transpose((2, 0, 1))
     img = img[np.newaxis, :, :, :] / 255.0
     img = torch.from_numpy(img).float()
@@ -216,7 +219,9 @@ def get_test_input():
 
 
 if __name__ == '__main__':
-    model = Darknet("yolov3.cfg")
-    inp = get_test_input()
+    model = Darknet("pygorithms/yolov3.cfg").cuda()
+    print(model.module_list)
+
+    inp = get_test_input().to(device='cuda' if torch.cuda.is_available() else 'cpu')
     pred = model(inp, torch.cuda.is_available())
     print(pred)
