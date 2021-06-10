@@ -329,8 +329,6 @@ def get_test_input():
 
 if __name__ == '__main__':
     model = Darknet("pygorithms/yolov3.cfg").cuda()
-    print(model.module_list)
-
     inp = get_test_input().to(device='cuda' if torch.cuda.is_available() else 'cpu')
     pred = model(inp, torch.cuda.is_available())
     print(pred)
